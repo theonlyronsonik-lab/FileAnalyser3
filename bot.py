@@ -250,7 +250,7 @@ def send_email(subject, body):
 
 def is_high_quality(trend_aligned):
     hour = datetime.now(timezone.utc).hour
-    return trend_aligned and (10 <= hour <= 22)
+    return trend_aligned and (00 <= hour <= 23)
 
 
 # ─────────────────────────────────────────────
