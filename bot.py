@@ -43,7 +43,7 @@ trades_history   = []
 symbol_state     = {}
 
 SESSIONS = {
-    "Asia":     (3,  10),
+    "Asia":     (0,  10),
     "London":   (10,  15),
     "New York": (15, 22),
 }
