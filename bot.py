@@ -25,7 +25,7 @@ SMTP_PASS   = os.getenv("SMTP_PASS", "")
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 
 SYMBOLS  = ["XAU/USD", "GBP/USD", "SPY", "QQQ"]
-INTERVAL = "5min"
+INTERVAL = "4h"
 
 COOLDOWN_MINUTES = 15
 
@@ -185,11 +185,11 @@ def get_market_context(symbol, price, rsi, sma200, atr, trend):
 
     if rsi >= RSI_OVERBOUGHT:
         tips.append(f"RSI {rsi:.1f} — overbought, momentum may be exhausting")
-    elif rsi >= 60:
+    elif rsi >= 70:
         tips.append(f"RSI {rsi:.1f} — elevated, strong momentum but watch for pullback")
     elif rsi <= RSI_OVERSOLD:
         tips.append(f"RSI {rsi:.1f} — oversold, potential bounce zone")
-    elif rsi <= 40:
+    elif rsi <= 30:
         tips.append(f"RSI {rsi:.1f} — weak, selling pressure present")
     else:
         tips.append(f"RSI {rsi:.1f} — neutral zone")
@@ -207,9 +207,9 @@ def get_market_context(symbol, price, rsi, sma200, atr, trend):
             tips.append("Low volatility — tight conditions")
 
     hour = datetime.now(timezone.utc).hour
-    if 14 <= hour <= 20:
+    if 10 <= hour <= 23:
         tips.append("NY session active — peak liquidity window")
-    elif 7 <= hour <= 10:
+    elif 0 <= hour <= 10:
         tips.append("London/Asia overlap — elevated volatility possible")
 
     return " | ".join(tips)
@@ -250,7 +250,7 @@ def send_email(subject, body):
 
 def is_high_quality(trend_aligned):
     hour = datetime.now(timezone.utc).hour
-    return trend_aligned and (14 <= hour <= 20)
+    return trend_aligned and (10 <= hour <= 22)
 
 
 # ─────────────────────────────────────────────
