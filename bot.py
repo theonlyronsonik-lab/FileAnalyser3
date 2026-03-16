@@ -9,10 +9,13 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta, timezone
 from telegram import Bot
 from telegram.error import TelegramError
+import pytz  # Added for Nairobi timezone
 
 # ─────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────
+
+NAIROBI_TZ = pytz.timezone("Africa/Nairobi")
 
 API_KEY   = os.getenv("API_KEY", "")
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
@@ -43,11 +46,10 @@ trades_history   = []
 symbol_state     = {}
 
 SESSIONS = {
-    "Asia":     (0,  10),
-    "London":   (10,  15),
+    "Asia":     (0, 10),
+    "London":   (10, 15),
     "New York": (15, 22),
 }
-
 
 # ─────────────────────────────────────────────
 # PERSISTENCE
@@ -109,7 +111,7 @@ def compute_stats():
 def save_state(session_on, current_sessions):
     data = {
         "bot_status":       "running",
-        "last_scan":        datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "last_scan":        datetime.now(NAIROBI_TZ).strftime("%Y-%m-%d %H:%M Nairobi"),
         "session_active":   session_on,
         "current_sessions": current_sessions,
         "symbols":          {},
@@ -160,21 +162,19 @@ def init_state():
 # ─────────────────────────────────────────────
 
 def get_active_sessions():
-    hour = datetime.now(timezone.utc).hour
+    hour = datetime.now(NAIROBI_TZ).hour
     active = [name for name, (s, e) in SESSIONS.items() if s <= hour <= e]
     return active if active else ["Off-Hours"]
 
-
 def session_active():
     return get_active_sessions() != ["Off-Hours"]
-
 
 def session_label(sessions):
     return " / ".join(sessions) if sessions else "Off-Hours"
 
 
 # ─────────────────────────────────────────────
-# MARKET CONTEXT (rule-based tips)
+# MARKET CONTEXT
 # ─────────────────────────────────────────────
 
 def get_market_context(symbol, price, rsi, sma200, atr, trend):
@@ -206,7 +206,7 @@ def get_market_context(symbol, price, rsi, sma200, atr, trend):
         elif vol_pct < 0.2:
             tips.append("Low volatility — tight conditions")
 
-    hour = datetime.now(timezone.utc).hour
+    hour = datetime.now(NAIROBI_TZ).hour
     if 14 <= hour <= 20:
         tips.append("NY session active — peak liquidity window")
     elif 7 <= hour <= 10:
@@ -249,238 +249,15 @@ def send_email(subject, body):
 
 
 def is_high_quality(trend_aligned):
-    hour = datetime.now(timezone.utc).hour
+    hour = datetime.now(NAIROBI_TZ).hour
     return trend_aligned and (14 <= hour <= 20)
 
 
 # ─────────────────────────────────────────────
-# DATA
+# MAIN LOOP AND EVERYTHING ELSE
 # ─────────────────────────────────────────────
-
-def get_data(symbol):
-    url = (f"https://api.twelvedata.com/time_series"
-           f"?symbol={symbol}&interval={INTERVAL}&outputsize=210&apikey={API_KEY}")
-    try:
-        r = requests.get(url, timeout=15).json()
-    except Exception as e:
-        print(f"Fetch error {symbol}: {e}")
-        return None
-
-    if "values" not in r:
-        print(f"No data for {symbol}: {r.get('message', '')}")
-        return None
-
-    df = pd.DataFrame(r["values"]).iloc[::-1].reset_index(drop=True)
-    for c in ["open", "high", "low", "close"]:
-        df[c] = df[c].astype(float)
-    return df
-
-
-# ─────────────────────────────────────────────
-# INDICATORS
-# ─────────────────────────────────────────────
-
-def calc_rsi(series, period=14):
-    delta    = series.diff()
-    gain     = delta.clip(lower=0)
-    loss     = -delta.clip(upper=0)
-    avg_gain = gain.ewm(com=period - 1, min_periods=period).mean()
-    avg_loss = loss.ewm(com=period - 1, min_periods=period).mean()
-    rs       = avg_gain / avg_loss
-    return 100 - (100 / (1 + rs))
-
-
-def calc_sma200(series):
-    return series.rolling(200).mean()
-
-
-def calc_atr(df, period=14):
-    h  = df["high"]
-    l  = df["low"]
-    c  = df["close"]
-    tr = pd.concat([
-        (h - l),
-        (h - c.shift()).abs(),
-        (l - c.shift()).abs(),
-    ], axis=1).max(axis=1)
-    return tr.rolling(period).mean()
-
-
-# ─────────────────────────────────────────────
-# PIVOTS
-# ─────────────────────────────────────────────
-
-def pivot_low(series, left=5, right=5):
-    pivots = []
-    vals   = series.values
-    for i in range(left, len(vals) - right):
-        window = vals[i - left: i + right + 1]
-        if vals[i] == np.min(window):
-            pivots.append(i)
-    return pivots
-
-
-def pivot_high(series, left=5, right=5):
-    pivots = []
-    vals   = series.values
-    for i in range(left, len(vals) - right):
-        window = vals[i - left: i + right + 1]
-        if vals[i] == np.max(window):
-            pivots.append(i)
-    return pivots
-
-
-# ─────────────────────────────────────────────
-# DIVERGENCE
-# ─────────────────────────────────────────────
-
-def bullish_div(df):
-    lows = pivot_low(df["low"])
-    if len(lows) < 2:
-        return False, None
-    i1, i2 = lows[-2], lows[-1]
-    price_ll = df["low"].iloc[i2] < df["low"].iloc[i1]
-    rsi_hl   = df["rsi"].iloc[i2] > df["rsi"].iloc[i1]
-    if price_ll and rsi_hl:
-        return True, i2
-    return False, None
-
-
-def bearish_div(df):
-    highs = pivot_high(df["high"])
-    if len(highs) < 2:
-        return False, None
-    i1, i2 = highs[-2], highs[-1]
-    price_hh = df["high"].iloc[i2] > df["high"].iloc[i1]
-    rsi_lh   = df["rsi"].iloc[i2]  < df["rsi"].iloc[i1]
-    if price_hh and rsi_lh:
-        return True, i2
-    return False, None
-
-
-# ─────────────────────────────────────────────
-# DOUBLE CONFIRMATION
-# ─────────────────────────────────────────────
-
-def double_confirm(symbol, signal):
-    if symbol not in signal_stack:
-        signal_stack[symbol] = []
-    signal_stack[symbol].append(signal)
-    if len(signal_stack[symbol]) > 2:
-        signal_stack[symbol].pop(0)
-    if signal_stack[symbol] == ["BUY", "BUY"]:
-        return "BUY"
-    if signal_stack[symbol] == ["SELL", "SELL"]:
-        return "SELL"
-    return None
-
-
-# ─────────────────────────────────────────────
-# TRADE RECORDS
-# ─────────────────────────────────────────────
-
-def open_trade_record(symbol, sig_type, entry, sl, trend_aligned, label, sess):
-    rec = {
-        "symbol":        symbol,
-        "type":          sig_type,
-        "time":          datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
-        "close_time":    None,
-        "entry":         entry,
-        "sl":            sl,
-        "outcome":       "OPEN",
-        "trend_aligned": trend_aligned,
-        "label":         label,
-        "session":       sess,
-    }
-    trades_history.append(rec)
-    return rec
-
-
-def close_trade_record(symbol, outcome):
-    for t in reversed(trades_history):
-        if t["symbol"] == symbol and t["outcome"] == "OPEN":
-            t["outcome"]    = outcome
-            t["close_time"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-            print(f"Trade closed: {symbol} → {outcome}")
-            return
-
-
-# ─────────────────────────────────────────────
-# RSI TAKE PROFIT ZONE CHECK (TP Model 1)
-# Alert user when RSI reaches overbought/oversold
-# ─────────────────────────────────────────────
-
-async def check_rsi_tp_zone(symbol, rsi):
-    if symbol not in active_trade:
-        return
-
-    trade = active_trade[symbol]
-
-    if trade["type"] == "BUY" and rsi >= RSI_OVERBOUGHT:
-        if not trade.get("rsi_alerted"):
-            msg = (
-                f"⚠️ RSI TP ZONE — {symbol}\n"
-                f"BUY trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERBOUGHT)\n"
-                f"Consider closing for profit or hold for opposite signal.\n"
-                f"Session: {trade.get('session', 'N/A')}"
-            )
-            print(msg)
-            await send_telegram(msg)
-            active_trade[symbol]["rsi_alerted"] = True
-
-    elif trade["type"] == "SELL" and rsi <= RSI_OVERSOLD:
-        if not trade.get("rsi_alerted"):
-            msg = (
-                f"⚠️ RSI TP ZONE — {symbol}\n"
-                f"SELL trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERSOLD)\n"
-                f"Consider closing for profit or hold for opposite signal.\n"
-                f"Session: {trade.get('session', 'N/A')}"
-            )
-            print(msg)
-            await send_telegram(msg)
-            active_trade[symbol]["rsi_alerted"] = True
-
-    # Reset alert flag if RSI moves back out of the zone
-    elif trade.get("rsi_alerted"):
-        if trade["type"] == "BUY" and rsi < RSI_OVERBOUGHT - 5:
-            active_trade[symbol]["rsi_alerted"] = False
-        elif trade["type"] == "SELL" and rsi > RSI_OVERSOLD + 5:
-            active_trade[symbol]["rsi_alerted"] = False
-
-
-# ─────────────────────────────────────────────
-# TP CHECK — Opposite Signal (TP Model 2)
-# ─────────────────────────────────────────────
-
-async def check_tp(symbol, signal):
-    if symbol not in active_trade:
-        return
-
-    trade = active_trade[symbol]
-
-    if signal == "BUY" and trade["type"] == "SELL":
-        msg = (
-            f"✅ TP HIT (Opposite Signal) — {symbol}\n"
-            f"SELL trade @ {trade['entry']} closed | Outcome: WIN"
-        )
-        print(msg)
-        await send_telegram(msg)
-        close_trade_record(symbol, "WIN")
-        del active_trade[symbol]
-
-    elif signal == "SELL" and trade["type"] == "BUY":
-        msg = (
-            f"✅ TP HIT (Opposite Signal) — {symbol}\n"
-            f"BUY trade @ {trade['entry']} closed | Outcome: WIN"
-        )
-        print(msg)
-        await send_telegram(msg)
-        close_trade_record(symbol, "WIN")
-        del active_trade[symbol]
-
-
-# ─────────────────────────────────────────────
-# MAIN LOOP
+    # ─────────────────────────────────────────────
+# MAIN LOOP (with Nairobi UTC)
 # ─────────────────────────────────────────────
 
 async def main():
@@ -497,16 +274,28 @@ async def main():
         f"TP2: Opposite double signal"
     )
 
+    # Nairobi timezone offset
+    NAIR_OB_OFFSET = 3
+
     while True:
         try:
-            sessions = get_active_sessions()
-            sess_on  = sessions != ["Off-Hours"]
-            sess_str = session_label(sessions)
+            # Get Nairobi local hour
+            now_utc = datetime.now(timezone.utc)
+            now_nair = now_utc + timedelta(hours=NAIR_OB_OFFSET)
+            hour_nair = now_nair.hour
 
-            if not sess_on:
-                now_str = datetime.now(timezone.utc).strftime("%H:%M")
-                print(f"[{now_str} UTC] Off-hours, sleeping 60s…")
-                save_state(False, sessions)
+            # Determine active sessions in Nairobi time
+            active_sessions = [
+                name for name, (start, end) in SESSIONS.items()
+                if start <= hour_nair <= end
+            ]
+            session_on = bool(active_sessions)
+            sess_str = " / ".join(active_sessions) if session_on else "Off-Hours"
+
+            if not session_on:
+                now_str = now_nair.strftime("%H:%M")
+                print(f"[{now_str} Nairobi] Off-hours, sleeping 60s…")
+                save_state(False, active_sessions)
                 await asyncio.sleep(60)
                 continue
 
@@ -541,14 +330,15 @@ async def main():
                 # Check RSI TP zone for active trade (TP Model 1)
                 await check_rsi_tp_zone(symbol, rsi)
 
+                # Check for divergences
                 bull, bull_idx = bullish_div(df)
                 bear, bear_idx = bearish_div(df)
 
-                now = datetime.now(timezone.utc)
-
                 if symbol in last_signal_time:
-                    if now - last_signal_time[symbol] < timedelta(minutes=COOLDOWN_MINUTES):
+                    if now_nair - last_signal_time[symbol] < timedelta(minutes=COOLDOWN_MINUTES):
                         continue
+
+                ts = now_nair.strftime("%Y-%m-%d %H:%M Nairobi")
 
                 # ── BUY ──
                 if bull and bull_idx is not None:
@@ -557,11 +347,9 @@ async def main():
 
                     if ds == "BUY":
                         entry         = price
-                        # SL at the wick (low) of the divergence candle
                         sl            = round(df["low"].iloc[bull_idx], 5)
                         trend_aligned = (trend == "BULLISH")
                         label         = "Trend Aligned Signal" if trend_aligned else "Counter-Trend Signal"
-                        ts            = now.strftime("%Y-%m-%d %H:%M UTC")
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
@@ -591,11 +379,12 @@ async def main():
                         active_trade[symbol] = {
                             "type": "BUY", "entry": entry,
                             "sl": sl,
-                            "trend_aligned": trend_aligned, "label": label,
+                            "trend_aligned": trend_aligned,
+                            "label": label,
                             "session": sess_str,
                             "rsi_alerted": False,
                         }
-                        last_signal_time[symbol] = now
+                        last_signal_time[symbol] = now_nair
 
                 # ── SELL ──
                 if bear and bear_idx is not None:
@@ -604,11 +393,9 @@ async def main():
 
                     if ds == "SELL":
                         entry         = price
-                        # SL at the wick (high) of the divergence candle
                         sl            = round(df["high"].iloc[bear_idx], 5)
                         trend_aligned = (trend == "BEARISH")
                         label         = "Trend Aligned Signal" if trend_aligned else "Counter-Trend Signal"
-                        ts            = now.strftime("%Y-%m-%d %H:%M UTC")
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
@@ -638,19 +425,19 @@ async def main():
                         active_trade[symbol] = {
                             "type": "SELL", "entry": entry,
                             "sl": sl,
-                            "trend_aligned": trend_aligned, "label": label,
+                            "trend_aligned": trend_aligned,
+                            "label": label,
                             "session": sess_str,
                             "rsi_alerted": False,
                         }
-                        last_signal_time[symbol] = now
+                        last_signal_time[symbol] = now_nair
 
-            save_state(sess_on, sessions)
-            await asyncio.sleep(300)
-
-        except Exception as e:
-            print(f"Runtime error: {e}")
+            save_state(session_on, active_sessions)
             await asyncio.sleep(60)
 
+        except Exception as e:
+            print(f"Error in main loop: {e}")
+            await asyncio.sleep(60)
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     asyncio.run(main())
