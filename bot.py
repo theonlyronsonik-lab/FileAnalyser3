@@ -439,5 +439,5 @@ async def main():
             print(f"Error in main loop: {e}")
             await asyncio.sleep(60)
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     asyncio.run(main())
