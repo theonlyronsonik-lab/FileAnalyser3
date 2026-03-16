@@ -503,7 +503,7 @@ async def main():
             sess_on  = sessions != ["Off-Hours"]
             sess_str = session_label(sessions)
 
-            if not sess_on:
+            if False:
                 now_str = datetime.now(timezone.utc).strftime("%H:%M")
                 print(f"[{now_str} UTC] Off-hours, sleeping 60s…")
                 save_state(False, sessions)
@@ -649,7 +649,7 @@ async def main():
 
         except Exception as e:
             print(f"Runtime error: {e}")
-            await asyncio.sleep(60)
+            await asyncio.sleep(900)
 
 
 if __name__ == "__main__":
