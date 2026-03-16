@@ -1,0 +1,62 @@
+modules = ["nodejs-24", "python-3.12"]
+
+[[artifacts]]
+id = "artifacts/api-server"
+
+[[artifacts]]
+id = "artifacts/mockup-sandbox"
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash start.sh"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[userenv]
+
+[userenv.shared]
+API_KEY = "d2eb6b7532504ac3bc6d720f98b6171c"
+BOT_TOKEN = "7964075094:AAEvEVE2MRke1CXgcoQkr6xqCNf_bzK94J4"
+CHAT_ID = "6599172354"
+SMTP_USER = "ronfxtrades@gmail.com"
+SMTP_PASS = "qrzdmzqgsijnicay"
+ALERT_EMAIL = "ronfxtrades@gmail.com"
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "587"
+
+[nix]
+channel = "stable-25_05"
+packages = ["glibcLocales"]

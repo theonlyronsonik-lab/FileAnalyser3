@@ -1,0 +1,13 @@
+pandas
+numpy
+requests
+python-telegram-bot==21.9
+pytz
+flask
+flask
+numpy
+pandas
+python-telegram-bot==21.9
+pytz
+requests
+telegram

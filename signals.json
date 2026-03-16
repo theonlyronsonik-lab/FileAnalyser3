@@ -1,0 +1,146 @@
+{
+  "bot_status": "running",
+  "last_scan": "2026-03-15 20:40:32 UTC",
+  "session_active": true,
+  "current_sessions": [
+    "New York"
+  ],
+  "symbols": {
+    "XAU/USD": {
+      "price": 5019.78747,
+      "rsi": 47.78,
+      "sma200": 5019.79532,
+      "atr": 0.24071,
+      "trend": "BEARISH",
+      "active_trade": null,
+      "last_signal": {
+        "symbol": "XAU/USD",
+        "type": "BUY",
+        "time": "2026-03-15 20:40 UTC",
+        "entry": 5019.64461,
+        "sl": 5018.9006,
+        "trend_aligned": false,
+        "label": "Counter-Trend Signal",
+        "session": "New York",
+        "rsi": 46.33,
+        "trend": "BEARISH",
+        "context": "RSI 46.3 \u2014 neutral zone | Below SMA200 \u2014 long-term downtrend | Low volatility \u2014 tight conditions | NY session active \u2014 peak liquidity window"
+      }
+    },
+    "GBP/USD": {
+      "price": 1.32313,
+      "rsi": 46.28,
+      "sma200": 1.32379,
+      "atr": 0.00065,
+      "trend": "BEARISH",
+      "active_trade": null,
+      "last_signal": null
+    },
+    "SPY": {
+      "price": 662.29999,
+      "rsi": 40.31,
+      "sma200": 668.69769,
+      "atr": 0.65986,
+      "trend": "BEARISH",
+      "active_trade": null,
+      "last_signal": null
+    },
+    "QQQ": {
+      "price": 593.69,
+      "rsi": 46.93,
+      "sma200": 599.78188,
+      "atr": 0.61056,
+      "trend": "BEARISH",
+      "active_trade": null,
+      "last_signal": null
+    }
+  },
+  "recent_signals": [
+    {
+      "symbol": "XAU/USD",
+      "type": "BUY",
+      "time": "2026-03-15 20:40 UTC",
+      "entry": 5019.64461,
+      "sl": 5018.9006,
+      "trend_aligned": false,
+      "label": "Counter-Trend Signal",
+      "session": "New York",
+      "rsi": 46.33,
+      "trend": "BEARISH",
+      "context": "RSI 46.3 \u2014 neutral zone | Below SMA200 \u2014 long-term downtrend | Low volatility \u2014 tight conditions | NY session active \u2014 peak liquidity window"
+    }
+  ],
+  "trades_history": [
+    {
+      "symbol": "XAU/USD",
+      "type": "BUY",
+      "time": "2026-03-15 20:40 UTC",
+      "close_time": null,
+      "entry": 5019.64461,
+      "sl": 5018.9006,
+      "outcome": "OPEN",
+      "trend_aligned": false,
+      "label": "Counter-Trend Signal",
+      "session": "New York"
+    }
+  ],
+  "stats": {
+    "total": 0,
+    "wins": 0,
+    "losses": 0,
+    "pending": 1,
+    "win_rate": 0,
+    "by_asset": {
+      "XAU/USD": {
+        "total": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_rate": 0
+      },
+      "GBP/USD": {
+        "total": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_rate": 0
+      },
+      "SPY": {
+        "total": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_rate": 0
+      },
+      "QQQ": {
+        "total": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_rate": 0
+      }
+    },
+    "by_session": {
+      "Asia": {
+        "total": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_rate": 0
+      },
+      "London": {
+        "total": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_rate": 0
+      },
+      "New York": {
+        "total": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_rate": 0
+      },
+      "Off-Hours": {
+        "total": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_rate": 0
+      }
+    }
+  }
+}
