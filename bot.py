@@ -27,7 +27,7 @@ ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 SYMBOLS  = ["XAU/USD", "GBP/USD", "SPY", "EUR/JPY"]
 INTERVAL = "2h"
 
-COOLDOWN_MINUTES = 15
+COOLDOWN_MINUTES = 60
 
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD   = 30
@@ -270,7 +270,7 @@ def get_data(symbol):
         print(f"No data for {symbol}: {r.get('message', '')}")
         return None
 
-    df = pd.DataFrame(r["values"]).iloc[::-1].reset_index(drop=True)
+    df = pd.DataFrame(r["values"]).iloc[::-6].reset_index(drop=True)
     for c in ["open", "high", "low", "close"]:
         df[c] = df[c].astype(float)
     return df
@@ -310,7 +310,7 @@ def calc_atr(df, period=14):
 # PIVOTS
 # ─────────────────────────────────────────────
 
-def pivot_low(series, left=5, right=5):
+def pivot_low(series, left=8, right=8):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -320,7 +320,7 @@ def pivot_low(series, left=5, right=5):
     return pivots
 
 
-def pivot_high(series, left=5, right=5):
+def pivot_high(series, left=8, right=8):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -649,7 +649,7 @@ async def main():
 
         except Exception as e:
             print(f"Runtime error: {e}")
-            await asyncio.sleep(600)
+            await asyncio.sleep(300)
 
 
 if __name__ == "__main__":
