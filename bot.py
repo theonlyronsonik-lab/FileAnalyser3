@@ -25,12 +25,12 @@ SMTP_PASS   = os.getenv("SMTP_PASS", "")
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 
 SYMBOLS  = ["XAU/USD", "GBP/USD", "SPY", "EUR/JPY"]
-INTERVAL = "2h"
+INTERVAL = "30min"
 
-COOLDOWN_MINUTES = 60
+COOLDOWN_MINUTES = 15
 
-RSI_OVERBOUGHT = 70
-RSI_OVERSOLD   = 30
+RSI_OVERBOUGHT = 65
+RSI_OVERSOLD   = 35
 
 SIGNALS_FILE = "signals.json"
 
@@ -310,7 +310,7 @@ def calc_atr(df, period=14):
 # PIVOTS
 # ─────────────────────────────────────────────
 
-def pivot_low(series, left=8, right=8):
+def pivot_low(series, left=5, right=5):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -320,7 +320,7 @@ def pivot_low(series, left=8, right=8):
     return pivots
 
 
-def pivot_high(series, left=8, right=8):
+def pivot_high(series, left=5, right=5):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -571,6 +571,7 @@ async def main():
                             f"Session: {sess_str} | {ts}\n"
                             f"📊 Context: {context}\n"
                             f"TP1: RSI overbought alert | TP2: Opposite signal"
+                            f"OK NOW WAIT FOR LTF ENTRY SIGNAL.., INAKAM HAHA"
                         )
                         print(tg_msg)
                         await send_telegram(tg_msg)
@@ -612,12 +613,13 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🔴 SELL — {symbol}\n"
+                            f"🔴HTF(30min) SELL — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
                             f"📊 Context: {context}\n"
                             f"TP1: RSI oversold alert | TP2: Opposite signal"
+                            f"OK NOW WAIT FOR LTF ENTRY SIGNAL.., INAKAM HAHA"
                         )
                         print(tg_msg)
                         await send_telegram(tg_msg)
