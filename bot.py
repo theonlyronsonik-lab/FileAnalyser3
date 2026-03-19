@@ -41,6 +41,7 @@ active_trade     = {}
 recent_signals   = []
 trades_history   = []
 symbol_state     = {}
+last_candle_time = {}
 
 SESSIONS = {
     "Asia":     (2,  10),
@@ -310,7 +311,7 @@ def calc_atr(df, period=14):
 # PIVOTS
 # ─────────────────────────────────────────────
 
-def pivot_low(series, left=5, right=5):
+def pivot_low(series, left=8, right=8):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -320,7 +321,7 @@ def pivot_low(series, left=5, right=5):
     return pivots
 
 
-def pivot_high(series, left=5, right=5):
+def pivot_high(series, left=8, right=8):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -512,6 +513,15 @@ async def main():
 
             for symbol in SYMBOLS:
                 df = get_data(symbol)
+                current_candle_time = df["datetime"].iloc[-2]
+
+                        # skip if candle hasn't changed
+                if symbol in last_candle_time:
+                if last_candle_time[symbol] == current_candle_time:
+                    continue
+
+                    # update last seen candle
+                last_candle_time[symbol] = current_candle_time
                 if df is None:
                     continue
 
@@ -565,7 +575,7 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🟢 BUY — {symbol}\n"
+                            f"🟢 HTF BUY — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
