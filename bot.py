@@ -511,19 +511,21 @@ async def main():
                 await asyncio.sleep(60)
                 continue
 
-            for symbol in SYMBOLS:
+                for symbol in SYMBOLS:
                 df = get_data(symbol)
-                current_candle_time = df["datetime"].iloc[-2]
-
-                        # skip if candle hasn't changed
-                if symbol in last_candle_time:
-                if last_candle_time[symbol] == current_candle_time:
-                    continue
-
-                    # update last seen candle
-                last_candle_time[symbol] = current_candle_time
+            
                 if df is None:
                     continue
+            
+                current_candle_time = df["datetime"].iloc[-2]
+            
+                # skip if candle hasn't changed
+                if symbol in last_candle_time:
+                    if last_candle_time[symbol] == current_candle_time:
+                        continue
+            
+                # update last seen candle
+                last_candle_time[symbol] = current_candle_time
 
                 df["rsi"]    = calc_rsi(df["close"])
                 df["sma200"] = calc_sma200(df["close"])
