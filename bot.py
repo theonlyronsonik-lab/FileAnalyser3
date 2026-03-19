@@ -522,7 +522,7 @@ async def main():
                 # skip if candle hasn't changed
                     if symbol in last_candle_time:
                         if last_candle_time[symbol] == current_candle_time:
-                        continue
+                            continue
             
                 # update last seen candle
                     last_candle_time[symbol] = current_candle_time
