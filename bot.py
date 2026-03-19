@@ -29,8 +29,8 @@ INTERVAL = "30min"
 
 COOLDOWN_MINUTES = 15
 
-RSI_OVERBOUGHT = 65
-RSI_OVERSOLD   = 35
+RSI_OVERBOUGHT = 70
+RSI_OVERSOLD   = 30
 
 SIGNALS_FILE = "signals.json"
 
@@ -43,7 +43,7 @@ trades_history   = []
 symbol_state     = {}
 
 SESSIONS = {
-    "Asia":     (0,  10),
+    "Asia":     (2,  10),
     "London":   (10,  15),
     "New York": (15, 22),
 }
@@ -571,7 +571,6 @@ async def main():
                             f"Session: {sess_str} | {ts}\n"
                             f"📊 Context: {context}\n"
                             f"TP1: RSI overbought alert | TP2: Opposite signal"
-                            f"OK NOW WAIT FOR LTF ENTRY SIGNAL.., INAKAM HAHA"
                         )
                         print(tg_msg)
                         await send_telegram(tg_msg)
@@ -619,7 +618,6 @@ async def main():
                             f"Session: {sess_str} | {ts}\n"
                             f"📊 Context: {context}\n"
                             f"TP1: RSI oversold alert | TP2: Opposite signal"
-                            f"OK NOW WAIT FOR LTF ENTRY SIGNAL.., INAKAM HAHA"
                         )
                         print(tg_msg)
                         await send_telegram(tg_msg)
