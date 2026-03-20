@@ -46,7 +46,7 @@ last_candle_time = {}
 SESSIONS = {
     "Asia":     (1,  7),
     "London":   (7,  13),
-    "New York": (13, 21),
+    "New York": (13, 20),
 }
 
 
