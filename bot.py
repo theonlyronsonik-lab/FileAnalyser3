@@ -29,8 +29,8 @@ INTERVAL = "15min"
 
 COOLDOWN_MINUTES = 15
 
-RSI_OVERBOUGHT = 70
-RSI_OVERSOLD   = 30
+RSI_OVERBOUGHT = 65
+RSI_OVERSOLD   = 35
 
 SIGNALS_FILE = "signals.json"
 
@@ -311,7 +311,7 @@ def calc_atr(df, period=14):
 # PIVOTS
 # ─────────────────────────────────────────────
 
-def pivot_low(series, left=8, right=8):
+def pivot_low(series, left=5, right=5):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -321,7 +321,7 @@ def pivot_low(series, left=8, right=8):
     return pivots
 
 
-def pivot_high(series, left=8, right=8):
+def pivot_high(series, left=5, right=5):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -432,7 +432,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     elif trade["type"] == "SELL" and rsi <= RSI_OVERSOLD:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️ RSI TP ZONE — {symbol}\n"
+                f"⚠️ HTF RSI TP ZONE — {symbol}\n"
                 f"SELL trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERSOLD)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -461,7 +461,7 @@ async def check_tp(symbol, signal):
 
     if signal == "BUY" and trade["type"] == "SELL":
         msg = (
-            f"✅ TP HIT (Opposite Signal) — {symbol}\n"
+            f"✅ HTF-TP HIT (Opposite Signal) — {symbol}\n"
             f"SELL trade @ {trade['entry']} closed | Outcome: WIN"
         )
         print(msg)
@@ -471,7 +471,7 @@ async def check_tp(symbol, signal):
 
     elif signal == "SELL" and trade["type"] == "BUY":
         msg = (
-            f"✅ TP HIT (Opposite Signal) — {symbol}\n"
+            f"✅ HTF-TP HIT (Opposite Signal) — {symbol}\n"
             f"BUY trade @ {trade['entry']} closed | Outcome: WIN"
         )
         print(msg)
@@ -577,12 +577,12 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🟢 HTF BUY — {symbol}\n"
+                            f"🟢 HTF(15 min)BUY — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
                             f"📊 Context: {context}\n"
-                            f"TP1: RSI overbought alert | TP2: Opposite signal"
+                            f"TP1: RSI overbought alert | TP2: Opposite signal....AFTER SIGNAL LOOK FOR ENTRIES, WITHIN THE RANGE , BEST IF NEAR EXTREME TO RISK LESS"
                         )
                         print(tg_msg)
                         await send_telegram(tg_msg)
@@ -624,12 +624,12 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🔴HTF(30min) SELL — {symbol}\n"
+                            f"🔴HTF(15min) SELL — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
                             f"📊 Context: {context}\n"
-                            f"TP1: RSI oversold alert | TP2: Opposite signal"
+                            f"TP1: RSI oversold alert | TP2: Opposite signal,.....AFTER SIGNAL LOOK FOR ENTRIES, WITHIN THE RANGE , BEST IF NEAR EXTREME TO RISK LESS"
                         )
                         print(tg_msg)
                         await send_telegram(tg_msg)
