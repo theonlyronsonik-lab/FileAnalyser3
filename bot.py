@@ -44,9 +44,9 @@ symbol_state     = {}
 last_candle_time = {}
 
 SESSIONS = {
-    "Asia":     (2,  10),
-    "London":   (10,  15),
-    "New York": (15, 22),
+    "Asia":     (1,  7),
+    "London":   (7,  13),
+    "New York": (13, 21),
 }
 
 
