@@ -420,7 +420,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     if trade["type"] == "BUY" and rsi >= RSI_OVERBOUGHT:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️ RSI TP ZONE — {symbol}\n"
+                f"⚠️htf RSI TP ZONE — {symbol}\n"
                 f"BUY trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERBOUGHT)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -582,7 +582,7 @@ async def main():
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
                             f"📊 Context: {context}\n"
-                            f"TP1: RSI overbought alert | TP2: Opposite signal....AFTER SIGNAL LOOK FOR ENTRIES, WITHIN THE RANGE , BEST IF NEAR EXTREME TO RISK LESS"
+                            f"TP1: RSI overbought alert | TP2: Opposite signal....AFTER SIGNAL LOOK FOR ENTRIES, sth like 5 or 3 mins.. WITHIN THE RANGE , BEST IF NEAR EXTREME TO RISK LESS)"
                         )
                         print(tg_msg)
                         await send_telegram(tg_msg)
