@@ -25,12 +25,12 @@ SMTP_PASS   = os.getenv("SMTP_PASS", "")
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 
 SYMBOLS  = ["XAU/USD", "GBP/USD", "S&P 500", "EUR/JPY"]
-INTERVAL = "15min"
+INTERVAL = "1min"
 
-COOLDOWN_MINUTES = 15
+COOLDOWN_MINUTES = 10
 
-RSI_OVERBOUGHT = 65
-RSI_OVERSOLD   = 35
+RSI_OVERBOUGHT = 70
+RSI_OVERSOLD   = 30
 
 SIGNALS_FILE = "signals.json"
 
@@ -311,7 +311,7 @@ def calc_atr(df, period=14):
 # PIVOTS
 # ─────────────────────────────────────────────
 
-def pivot_low(series, left=5, right=5):
+def pivot_low(series, left=6, right=6):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -321,7 +321,7 @@ def pivot_low(series, left=5, right=5):
     return pivots
 
 
-def pivot_high(series, left=5, right=5):
+def pivot_high(series, left=6, right=6):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -420,7 +420,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     if trade["type"] == "BUY" and rsi >= RSI_OVERBOUGHT:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️htf RSI TP ZONE — {symbol}\n"
+                f"⚠️LLtf RSI TP ZONE — {symbol}\n"
                 f"BUY trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERBOUGHT)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -432,7 +432,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     elif trade["type"] == "SELL" and rsi <= RSI_OVERSOLD:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️ HTF RSI TP ZONE — {symbol}\n"
+                f"⚠️ LLTF RSI TP ZONE — {symbol}\n"
                 f"SELL trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERSOLD)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -461,7 +461,7 @@ async def check_tp(symbol, signal):
 
     if signal == "BUY" and trade["type"] == "SELL":
         msg = (
-            f"✅ HTF-TP HIT (Opposite Signal) — {symbol}\n"
+            f"✅ LLTF-TP HIT (Opposite Signal) — {symbol}\n"
             f"SELL trade @ {trade['entry']} closed | Outcome: WIN"
         )
         print(msg)
@@ -471,7 +471,7 @@ async def check_tp(symbol, signal):
 
     elif signal == "SELL" and trade["type"] == "BUY":
         msg = (
-            f"✅ HTF-TP HIT (Opposite Signal) — {symbol}\n"
+            f"✅ LLTF-TP HIT (Opposite Signal) — {symbol}\n"
             f"BUY trade @ {trade['entry']} closed | Outcome: WIN"
         )
         print(msg)
@@ -577,7 +577,7 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🟢 HTF(15 min)BUY — {symbol}\n"
+                            f"🟢 LLTF(5 min)BUY — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
@@ -624,7 +624,7 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🔴HTF(15min) SELL — {symbol}\n"
+                            f"🔴LLTF(5min) SELL — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
@@ -657,11 +657,11 @@ async def main():
                         last_signal_time[symbol] = now
 
             save_state(sess_on, sessions)
-            await asyncio.sleep(300)
+            await asyncio.sleep(180)
 
         except Exception as e:
             print(f"Runtime error: {e}")
-            await asyncio.sleep(300)
+            await asyncio.sleep(180)
 
 
 if __name__ == "__main__":
