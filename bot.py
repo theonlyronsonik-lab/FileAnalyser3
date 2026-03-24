@@ -25,9 +25,9 @@ SMTP_PASS   = os.getenv("SMTP_PASS", "")
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 
 SYMBOLS  = ["XAU/USD", "GBP/USD", "S&P 500", "EUR/JPY"]
-INTERVAL = "5min"
+INTERVAL = "15min"
 
-COOLDOWN_MINUTES = 15
+COOLDOWN_MINUTES = 20
 
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD   = 30
@@ -271,7 +271,7 @@ def get_data(symbol):
         print(f"No data for {symbol}: {r.get('message', '')}")
         return None
 
-    df = pd.DataFrame(r["values"]).iloc[::-6].reset_index(drop=True)
+    df = pd.DataFrame(r["values"]).iloc[::-2].reset_index(drop=True)
     for c in ["open", "high", "low", "close"]:
         df[c] = df[c].astype(float)
     return df
@@ -531,10 +531,10 @@ async def main():
                 df["sma200"] = calc_sma200(df["close"])
                 df["atr"]    = calc_atr(df)
 
-                price   = round(df["close"].iloc[-1], 5)
-                rsi     = round(df["rsi"].iloc[-1], 2)
-                sma200  = df["sma200"].iloc[-1]
-                atr     = df["atr"].iloc[-1]
+                price   = round(df["close"].iloc[-2], 5)
+                rsi     = round(df["rsi"].iloc[-2], 2)
+                sma200  = df["sma200"].iloc[-2]
+                atr     = df["atr"].iloc[-2]
 
                 sma200_val = round(sma200, 5) if not pd.isna(sma200) else None
                 atr_val    = round(atr,    5) if not pd.isna(atr)    else None
@@ -577,7 +577,7 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🟢 LTF(5 min)BUY — {symbol}\n"
+                            f"🟢 LTF(15min)BUY — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
@@ -624,7 +624,7 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🔴LTF(5min) SELL — {symbol}\n"
+                            f"🔴LTF(15min) SELL — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
