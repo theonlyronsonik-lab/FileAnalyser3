@@ -311,7 +311,7 @@ def calc_atr(df, period=14):
 # PIVOTS
 # ─────────────────────────────────────────────
 
-def pivot_low(series, left=6, right=6):
+def pivot_low(series, left=5, right=5):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
@@ -321,7 +321,7 @@ def pivot_low(series, left=6, right=6):
     return pivots
 
 
-def pivot_high(series, left=6, right=6):
+def pivot_high(series, left=5, right=5:
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
