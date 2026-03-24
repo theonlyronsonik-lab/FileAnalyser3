@@ -321,7 +321,7 @@ def pivot_low(series, left=5, right=5):
     return pivots
 
 
-def pivot_high(series, left=5, right=5:
+def pivot_high(series, left=5, right=5):
     pivots = []
     vals   = series.values
     for i in range(left, len(vals) - right):
