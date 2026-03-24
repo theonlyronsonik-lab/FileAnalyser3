@@ -420,7 +420,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     if trade["type"] == "BUY" and rsi >= RSI_OVERBOUGHT:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️Ltf RSI TP ZONE — {symbol}\n"
+                f"⚠️Mtf RSI TP ZONE — {symbol}\n"
                 f"BUY trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERBOUGHT)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -432,7 +432,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     elif trade["type"] == "SELL" and rsi <= RSI_OVERSOLD:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️ LTF RSI TP ZONE — {symbol}\n"
+                f"⚠️ MTF RSI TP ZONE — {symbol}\n"
                 f"SELL trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERSOLD)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -461,7 +461,7 @@ async def check_tp(symbol, signal):
 
     if signal == "BUY" and trade["type"] == "SELL":
         msg = (
-            f"✅ LTF-TP HIT (Opposite Signal) — {symbol}\n"
+            f"✅ MTF-TP HIT (Opposite Signal) — {symbol}\n"
             f"SELL trade @ {trade['entry']} closed | Outcome: WIN"
         )
         print(msg)
@@ -471,7 +471,7 @@ async def check_tp(symbol, signal):
 
     elif signal == "SELL" and trade["type"] == "BUY":
         msg = (
-            f"✅ LTF-TP HIT (Opposite Signal) — {symbol}\n"
+            f"✅ MTF-TP HIT (Opposite Signal) — {symbol}\n"
             f"BUY trade @ {trade['entry']} closed | Outcome: WIN"
         )
         print(msg)
@@ -490,12 +490,13 @@ async def main():
     print(f"Bot started | Symbols: {SYMBOLS}")
 
     await send_telegram(
-        f"🤖 LTF Signal Bot Online\n"
+        f"🤖 MTF Signal Bot Online\n"
         f"Symbols: {', '.join(SYMBOLS)}\n"
         f"Interval: {INTERVAL}\n"
         f"SL: Divergence candle wick\n"
         f"TP1: RSI overbought/oversold alert\n"
         f"TP2: Opposite double signal"
+        f" When a signal is sent and price is at a high, enter at pull back, if at a low look for confirmations then enter, try entering where either sellers or buyers we're induced(fake move) , usually at demand zones and fvgs"
     )
 
     while True:
@@ -577,7 +578,7 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🟢 LTF(15min)BUY — {symbol}\n"
+                            f"🟢 MTF(15min)BUY — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
@@ -624,7 +625,7 @@ async def main():
                         context       = get_market_context(symbol, price, rsi, sma200_val, atr_val, trend)
 
                         tg_msg = (
-                            f"🔴LTF(15min) SELL — {symbol}\n"
+                            f"🔴MTF(15min) SELL — {symbol}\n"
                             f"Entry: {entry} | SL: {sl}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
                             f"Session: {sess_str} | {ts}\n"
@@ -657,11 +658,11 @@ async def main():
                         last_signal_time[symbol] = now
 
             save_state(sess_on, sessions)
-            await asyncio.sleep(180)
+            await asyncio.sleep(300)
 
         except Exception as e:
             print(f"Runtime error: {e}")
-            await asyncio.sleep(180)
+            await asyncio.sleep(300)
 
 
 if __name__ == "__main__":
