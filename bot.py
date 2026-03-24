@@ -27,7 +27,7 @@ ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 SYMBOLS  = ["XAU/USD", "GBP/USD", "S&P 500", "EUR/JPY"]
 INTERVAL = "5min"
 
-COOLDOWN_MINUTES = 15
+COOLDOWN_MINUTES = 8
 
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD   = 30
@@ -504,28 +504,21 @@ async def main():
             sess_on  = sessions != ["Off-Hours"]
             sess_str = session_label(sessions)
 
-            if False:
-                now_str = datetime.now(timezone.utc).strftime("%H:%M")
-                print(f"[{now_str} UTC] Off-hours, sleeping 60s…")
-                save_state(False, sessions)
-                await asyncio.sleep(60)
-                continue
+            for symbol in SYMBOLS:
+                df = get_data(symbol)
 
-                for symbol in SYMBOLS:
-                    df = get_data(symbol)
-            
-                    if df is None:
-                        continue
-            
-                    current_candle_time = df["datetime"].iloc[-2]
-            
+                if df is None:
+                    continue
+
+                current_candle_time = df["datetime"].iloc[-2]
+
                 # skip if candle hasn't changed
-                    if symbol in last_candle_time:
-                        if last_candle_time[symbol] == current_candle_time:
-                            continue
-            
+                if symbol in last_candle_time:
+                    if last_candle_time[symbol] == current_candle_time:
+                        continue
+
                 # update last seen candle
-                    last_candle_time[symbol] = current_candle_time
+                last_candle_time[symbol] = current_candle_time
 
                 df["rsi"]    = calc_rsi(df["close"])
                 df["sma200"] = calc_sma200(df["close"])
@@ -657,12 +650,11 @@ async def main():
                         last_signal_time[symbol] = now
 
             save_state(sess_on, sessions)
-            await asyncio.sleep(180)
+            await asyncio.sleep(60)
 
         except Exception as e:
             print(f"Runtime error: {e}")
-            await asyncio.sleep(180)
-
+            await asyncio.sleep(60)
 
 if __name__ == "__main__":
     asyncio.run(main())
