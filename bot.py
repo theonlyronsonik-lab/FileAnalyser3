@@ -24,7 +24,7 @@ SMTP_USER   = os.getenv("SMTP_USER", "")
 SMTP_PASS   = os.getenv("SMTP_PASS", "")
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 
-SYMBOLS  = ["XAU/USD", "EUR/USD", "S&P 500", "CAD/JPY"]
+SYMBOLS  = ["XAU/USD", "EUR/USD", "CAD/JPY", "AUD/CAD"]
 INTERVAL = "15min"
 
 COOLDOWN_MINUTES = 20
@@ -38,19 +38,21 @@ SIGNALS_FILE = "signals.json"
 SL_BUFFERS = {
     "XAU/USD": 0.50,
     "EUR/USD": 0.0003,
-    "S&P 500":     0.10,
+ 
     "CAD/JPY":     0.10,
+    "AUD/CAD":     0.10,
 }
 
 # Pip sizes per symbol
 PIP_SIZES = {
     "XAU/USD": 0.1,
     "EUR/USD": 0.0001,
-    "S&P 500":     0.01,
+    
     "CAD/JPY":     0.01,
+    "AUD/CAD":     0.01,
 }
 
-LOT_SIZE = 0.01  # Default lot size
+LOT_SIZE = 0.03  # Default lot size
 
 # State
 last_signal_time = {}
@@ -506,7 +508,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     if trade["type"] == "BUY" and rsi >= RSI_OVERBOUGHT:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️ HTF RSI TP ZONE — {symbol}\n"
+                f"⚠️ INTRADAY RSI TP ZONE — {symbol}\n"
                 f"BUY trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERBOUGHT)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -518,7 +520,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     elif trade["type"] == "SELL" and rsi <= RSI_OVERSOLD:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️ HTF ( 15min)RSI TP ZONE — {symbol}\n"
+                f"⚠️ INTRADAY ( 15min)RSI TP ZONE — {symbol}\n"
                 f"SELL trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERSOLD)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -607,7 +609,7 @@ async def main():
     print(f"Bot started | Symbols: {SYMBOLS}")
 
     await send_telegram(
-        f"🤖 HTF Signal Bot Online\n"
+        f"🤖 HTF(intraday) Signal Bot Online\n"
         f"Symbols: {', '.join(SYMBOLS)}\n"
         f"Interval: {INTERVAL}\n"
         f"SL: Divergence candle wick\n"
@@ -753,7 +755,7 @@ async def main():
                         risk_pips     = round((sl - entry) / pip_size, 1)
 
                         tg_msg = (
-                            f"🔴HTF_ SELL — {symbol}\n"
+                            f"🔴 HTF_ SELL — {symbol}\n"
                             f"Entry: {entry} | SL: {sl} | Risk: {risk_pips} pips\n"
                             f"Lot: {LOT_SIZE} | Pip: {pip_size}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
