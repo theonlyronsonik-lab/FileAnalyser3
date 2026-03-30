@@ -24,7 +24,7 @@ SMTP_USER   = os.getenv("SMTP_USER", "")
 SMTP_PASS   = os.getenv("SMTP_PASS", "")
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 
-SYMBOLS  = ["XAU/USD", "EUR/USD", "AUD/USD", "AUD/CAD" , "GBP/USD"]
+SYMBOLS  = ["XAU/USD", "EUR/USD", "AUD/USD", "GBP/USD"]
 INTERVAL = "5min"
 
 COOLDOWN_MINUTES = 10
@@ -40,7 +40,7 @@ SL_BUFFERS = {
     "EUR/USD": 0.0003,
     "GBP/USD": 0.0003,
     "AUD/USD":     0.10,
-    "AUD/CAD":     0.10,
+    
 }
 
 # Pip sizes per symbol
@@ -49,7 +49,6 @@ PIP_SIZES = {
     "EUR/USD": 0.0001,
     "GBP/USD": 0.0001,    
     "AUD/USD":     0.01,
-    "AUD/CAD":     0.01,
 }
 
 LOT_SIZE = 0.03  # Default lot size
