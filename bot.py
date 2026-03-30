@@ -508,7 +508,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     if trade["type"] == "BUY" and rsi >= RSI_OVERBOUGHT:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️ INTRADAY RSI TP ZONE — {symbol}\n"
+                f"⚠️  RSI TP ZONE — {symbol}\n"
                 f"BUY trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERBOUGHT)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -520,7 +520,7 @@ async def check_rsi_tp_zone(symbol, rsi):
     elif trade["type"] == "SELL" and rsi <= RSI_OVERSOLD:
         if not trade.get("rsi_alerted"):
             msg = (
-                f"⚠️ INTRADAY ( 15min)RSI TP ZONE — {symbol}\n"
+                f"⚠️ ( TP ZONE — {symbol}\n"
                 f"SELL trade @ {trade['entry']} | RSI: {rsi:.1f} (OVERSOLD)\n"
                 f"Consider closing for profit or hold for opposite signal.\n"
                 f"Session: {trade.get('session', 'N/A')}"
@@ -556,7 +556,7 @@ async def check_sl(symbol, price):
     raw_pips = -abs(raw_pips)
     profit   = calc_profit(raw_pips)
     msg = (
-        f"🛑 SL HIT for HTF signal— {symbol}\n"
+        f"🛑 SL HIT for confirmation signal— {symbol}\n"
         f"{trade['type']} @ {trade['entry']} | SL: {sl}\n"
         f"Close: {price} | Pips: {raw_pips} | P&L: ${profit}\n"
         f"Session: {trade.get('session', 'N/A')}"
@@ -609,7 +609,7 @@ async def main():
     print(f"Bot started | Symbols: {SYMBOLS}")
 
     await send_telegram(
-        f"🤖 HTF(intraday) Signal Bot Online\n"
+        f"🤖 Confirmation Signal Bot Online\n"
         f"Symbols: {', '.join(SYMBOLS)}\n"
         f"Interval: {INTERVAL}\n"
         f"SL: Divergence candle wick\n"
@@ -697,7 +697,7 @@ async def main():
                         risk_pips     = round((entry - sl) / pip_size, 1)
 
                         tg_msg = (
-                            f"🟢HTF BUY — {symbol}\n"
+                            f"🟢Confirmation BUY — {symbol}\n"
                             f"Entry: {entry} | SL: {sl} | Risk: {risk_pips} pips\n"
                             f"Lot: {LOT_SIZE} | Pip: {pip_size}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
@@ -755,7 +755,7 @@ async def main():
                         risk_pips     = round((sl - entry) / pip_size, 1)
 
                         tg_msg = (
-                            f"🔴 HTF_ SELL — {symbol}\n"
+                            f"🔴 Confirmation SELL — {symbol}\n"
                             f"Entry: {entry} | SL: {sl} | Risk: {risk_pips} pips\n"
                             f"Lot: {LOT_SIZE} | Pip: {pip_size}\n"
                             f"RSI: {rsi} | Trend: {trend} | {label}\n"
