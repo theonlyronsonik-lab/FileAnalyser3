@@ -64,8 +64,8 @@ last_div_time    = {}   # {symbol: {"BULL": candle_dt_str, "BEAR": candle_dt_str
 
 SESSIONS = {
     "Asia":     (1,  7),
-    "London":   (7,  15),
-    "New York": (14, 21),
+    "London":   (7,  13),
+    "New York": (13, 20),
 }
 
 
@@ -793,7 +793,7 @@ async def main():
 
         except Exception as e:
             print(f"Runtime error: {e}")
-            await asyncio.sleep(60)
+            await asyncio.sleep(150)
 
 
 if __name__ == "__main__":
