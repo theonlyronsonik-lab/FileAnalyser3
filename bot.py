@@ -24,7 +24,7 @@ SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASS = os.getenv("SMTP_PASS", "")
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 
-SYMBOLS = ["XAU/USD", "GBP/USD", "EUR/JPY", "AUD/USD"]
+SYMBOLS = ["XAU/USD", "GBP/USD", "EUR/JPY", "ETH/USD"]
 INTERVAL = "5min"
 
 RSI_OVERBOUGHT = 70
