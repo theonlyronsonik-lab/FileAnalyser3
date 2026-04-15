@@ -24,7 +24,7 @@ SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASS = os.getenv("SMTP_PASS", "")
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "")
 
-SYMBOLS = ["XAU/USD", "GBP/USD", "EUR/JPY", "EUR/USD"]
+SYMBOLS = ["XAU/USD", "GBP/USD", "USD/JPY", "EUR/USD" , "NDX" ]
 INTERVAL = "5min"
 
 RSI_OVERBOUGHT = 70
@@ -36,16 +36,18 @@ SIGNALS_FILE = "signals.json"
 SL_BUFFERS = {
     "XAU/USD": 0.50,
     "GBP/USD": 0.0003,
-    "EUR/JPY": 0.10,
-    "AUD/USD": 0.05,
+    "USD/JPY": 0.10,
+    "GBP/JPY": 0.05,
+    "NDX": 0.50,
 }
 
 # Pip sizes per symbol
 PIP_SIZES = {
     "XAU/USD": 0.1,
     "GBP/USD": 0.0001,
-    "EUR/JPY": 0.01,
-    "AUD/USD": 0.01,
+    "USD/JPY": 0.01,
+    "GBP/JPY": 0.01,
+    "NDX": 0.1,
 }
 
 LOT_SIZE = 0.06
@@ -61,7 +63,7 @@ signal_stack = {}
 SESSIONS = {
     "Asia": (2, 10),
     "London": (7, 16),
-    "New York": (13, 22),
+    "New York": (13, 23),
 }
 
 
@@ -1056,7 +1058,7 @@ async def main():
 
         except Exception as e:
             print(f"Runtime error: {e}")
-            await asyncio.sleep(150)
+            await asyncio.sleep(180)
 
 
 if __name__ == "__main__":
